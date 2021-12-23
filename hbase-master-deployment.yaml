@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.24.0 (4a2a0458)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hbase-master
+  name: hbase-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: hbase-master
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.24.0 (4a2a0458)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hdsdcfsdocker-hdrs-network: "true"
+        io.kompose.service: hbase-master
+    spec:
+      containers:
+        - env:
+            - name: HBASE_CONF_hbase_cluster_distributed
+              value: "true"
+            - name: HBASE_CONF_hbase_coprocessor_regionserver_classes
+              value: umc.cdc.hds.coprocessor.HdsRegionServerObserver
+            - name: HBASE_CONF_hbase_master
+              value: hbase-master:16000
+            - name: HBASE_CONF_hbase_master_hostname
+              value: hbase-master
+            - name: HBASE_CONF_hbase_master_info_port
+              value: "16010"
+            - name: HBASE_CONF_hbase_master_port
+              value: "16000"
+            - name: HBASE_CONF_hbase_regionserver_info_port
+              value: "16030"
+            - name: HBASE_CONF_hbase_regionserver_port
+              value: "16020"
+            - name: HBASE_CONF_hbase_rootdir
+              value: hdfs://namenode:9000/hbase
+            - name: HBASE_CONF_hbase_tmp_dir
+              value: /opt/hbase-2.3.5/tmp
+            - name: HBASE_CONF_hbase_zookeeper_property_clientPort
+              value: "2181"
+            - name: HBASE_CONF_hbase_zookeeper_property_dataDir
+              value: /opt/hbase-2.3.5/tmp/zookeeper
+            - name: HBASE_CONF_hbase_zookeeper_quorum
+              value: zoo1,zoo2
+            - name: HBASE_MANAGES_ZK
+              value: "false"
+            - name: HDS_CONF_hds_config_location
+              value: /opt/hdrs-1.1.0-without-cdh/conf
+            - name: HDS_CONF_hds_httpserver_cors_allow
+              value: "true"
+            - name: HDS_CONF_hds_httpserver_cors_origins
+              value: '*'
+            - name: HDS_CONF_hds_httpserver_port
+              value: "8000"
+            - name: HDS_CONF_hds_httpserver_task_long_num
+              value: "20"
+            - name: HDS_CONF_hds_httpserver_task_short_num
+              value: "20"
+            - name: HDS_CONF_hds_logger_batch_size
+              value: "3000"
+            - name: HDS_CONF_hds_logger_enable
+              value: "true"
+            - name: HDS_CONF_hds_logger_jdbc_db
+              value: phoenix
+            - name: HDS_CONF_hds_logger_jdbc_driver
+              value: org.apache.phoenix.jdbc.PhoenixDriver
+            - name: HDS_CONF_hds_logger_jdbc_url
+              value: jdbc:phoenix:zoo1:2181
+            - name: HDS_CONF_hds_logger_queue_size
+              value: "100000"
+            - name: HDS_CONF_hds_memory_buffer_upper_limit
+              value: "209715200"
+            - name: ZOO_ADMINSERVER_ENABLED
+              value: "true"
+            - name: ZOO_AUTOPURGE_PURGEINTERVAL
+              value: "0"
+            - name: ZOO_AUTOPURGE_SNAPRETAINCOUNT
+              value: "3"
+            - name: ZOO_CONF_DIR
+              value: /zookeeper/conf
+            - name: ZOO_DATA_DIR
+              value: /zookeeper/data
+            - name: ZOO_DATA_LOG_DIR
+              value: /zookeeper/datalog
+            - name: ZOO_INIT_LIMIT
+              value: "5"
+            - name: ZOO_LOG_DIR
+              value: /zookeeper/logs
+            - name: ZOO_MAX_CLIENT_CNXNS
+              value: "60"
+            - name: ZOO_STANDALONE_ENABLED
+              value: "true"
+            - name: ZOO_SYNC_LIMIT
+              value: "2"
+            - name: ZOO_TICK_TIME
+              value: "2000"
+          image: cwbw/hbase-hmaster
+          name: hbase-master
+          ports:
+            - containerPort: 16010
+          resources: {}
+          volumeMounts:
+            - mountPath: /opt/hbase-2.3.5/logs
+              name: hbase-master
+      hostname: hbase-master
+      restartPolicy: Always
+      volumes:
+        - name: hbase-master
+          persistentVolumeClaim:
+            claimName: hbase-master
+status: {}
